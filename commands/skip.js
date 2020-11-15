@@ -1,28 +1,37 @@
-const { BroadcastDispatcher } = require("discord.js");
-const queue = require("./queue");
+const ytdl = require('ytdl-core')
+const Discord = require("discord.js");
+
+const options = 
+{
+    filter: "audioonly",
+    dlChunkSize: 0,
+    highWaterMark: 1<<25,
+}
+
+function PlaySong(url)
+{
+    var stream = ytdl(url, options);
+    dispatcher = connection.play(stream);
+}
 
 module.exports = {
 	name: 'skip',
 	description: 'Skips the song',
     execute(message, args){
         
-
-
-        dispatcher.finish();
-        // if(!dispatcher){
-        //     message.channel.send('Ничего не играет...'); return;}
-        // if(!connection){
-        //     message.channel.send('Ничего не играет...'); return;}
-        
-        
-        // if(QUEUE.length > 0){
-        
-        // dispatcher = connection.play(QUEUE[0]);
-        // CURRENT = QUEUE[0]
-        // QUEUE.shift();
-        
-        // }
-
         message.delete();
+
+        if(!dispatcher || !connection)
+            return;
+
+        if(QUEUE.length > 0)
+        {
+            CURRENT = QUEUE.shift();
+            PlaySong(CURRENT.url);
+        } else {
+            dispatcher.destroy();
+            connection.disconnect();
+            CURRENT = null;
+        }
     }
 };

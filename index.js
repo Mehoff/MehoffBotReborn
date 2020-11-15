@@ -1,10 +1,8 @@
 const Discord = require('discord.js');
-const DiscordCommando = require('discord.js-commando')
 const { Client, MessageEmbed } = require('discord.js');
 const fs = require('fs')
 global.client = new Client();
 const config = require('./config.json');
-const ytdl = require('ytdl-core');
 
 
 client.commands = new Discord.Collection();
@@ -13,21 +11,25 @@ const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('
 for (const file of commandFiles) {
 	const command = require(`./commands/${file}`);
     client.commands.set(command.name, command);
-    console.log(`${command.name} set...`)
+    console.log(`${command.name} found...`)
 }
-
-
 
 client.on('ready', () => {
 
     global.QUEUE = [];
     global.CURRENT = null;
-    global.connection = null;
-    global.stream = null;
+    global.connection = null;    
     global.dispatcher = null;
+
+    // Stream не нужен
+    global.stream = null;
+    
+    // VoiceChannel тоже не нужен...
     global.voiceChannel = null;
+
+    // Возможно тоже будет не нужен.
     global.embed = null;
-    global.requests_channel_id = '777553955449470986'
+    global.repeat = false;
 
     console.log(`Logged in as ${client.user.tag}!`);
 });
@@ -41,7 +43,8 @@ client.on('message', async message => {
     const args = message.content.slice(config.prefix.length).trim().split(/ +/);
     const command = args.shift().toLowerCase();
 
-    if(!client.commands.has(command) || message.channel.id != requests_channel_id)
+    //                                                         music-player                                 bot-testing
+    if(!client.commands.has(command) || message.channel.id != '777553955449470986' || message.channel.id != '656574129373315143')
         return;
     
     try
@@ -68,5 +71,8 @@ client.login(config["discord-token"]);
 // Add Repeat toggle
 // add .env usage instead of confing.json
 // add embed...
-// Ускорить удаление сообщения
+// асинхронная работа с ytdl, embed чтобы убрать подлаг при доблавлении нового трека 
+// переместить опции ytdl в ytdl-options.json и настроить их работу
+// сделать PlayMusic глобальной функцией
+
 

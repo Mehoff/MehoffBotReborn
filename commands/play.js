@@ -14,6 +14,12 @@ function GenerateNewEmbed(song)
     return embed;
 }
 
+function PlaySong(url)
+{
+    var stream = ytdl(url, options);
+    dispatcher = connection.play(stream);
+}
+
 const options = 
 {
     filter: "audioonly",
@@ -29,7 +35,13 @@ module.exports = {
     async execute(message, args) {
     if(!ytdl.validateURL(args[0]))
         {
-            message.channel.send('Некорректный запрос, либо вы не подключены к голосовому каналу');
+            message.delete();
+
+            message.channel.send('Неверная ссылка')
+                .then(msg => {
+                    msg.delete({timeout: 2000});
+                })
+
             return;
         }
 
@@ -43,7 +55,7 @@ module.exports = {
             console.error(error);
         }
         
-        var song =
+        let song =
         {
             title: info.videoDetails.title,
             thumbnail: info.videoDetails.thumbnail.thumbnails[0].url,
@@ -52,33 +64,30 @@ module.exports = {
             author: message.author.username,
         };
 
-        QUEUE.push(song)
+        QUEUE.push(song);
 
-        if(CURRENT == null)
-        {
+        if(CURRENT == null){
+        
         connection = await message.member.voice.channel.join();
-        var stream = ytdl(song.url, options);
-        dispatcher = connection.play(stream);
 
-        CURRENT = song;
-        QUEUE.shift();
+        CURRENT = QUEUE.shift();
+        PlaySong(CURRENT.url);
 
-        dispatcher.on("finish", () =>
-         {
-            console.log('dispatcher::finish');
+        
+        dispatcher.on('start', () => {console.log('dispatcher::start')})
 
-            CURRENT = null;
-            if(QUEUE.length == 0)
-                connection.disconnect();
-            else
-            {
-                CURRENT = QUEUE[0];
-                QUEUE.shift();
-                
-                var stream = ytdl(CURRENT.url, options);
-                dispatcher = connection.play(stream);
-            }
+        dispatcher.on('finish', () => {
+
+            if(repeat)
+                PlaySong(CURRENT.url)
+
+            else if(QUEUE.length == 0){ CURRENT = null; dispatcher.destroy(); connection.disconnect(); }
+            
+            else { CURRENT = QUEUE.shift(); PlaySong(CURRENT.url); }
          })
+
+        dispatcher.on("error", console.error);
+
         }
         message.channel.send(GenerateNewEmbed(song))
         message.delete()
