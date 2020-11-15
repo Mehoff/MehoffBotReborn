@@ -5,6 +5,7 @@ module.exports = {
         if(dispatcher)
         {
             dispatcher.resume();
+            message.delete();
         }
 	},
 };

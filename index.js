@@ -26,6 +26,8 @@ client.on('ready', () => {
     global.stream = null;
     global.dispatcher = null;
     global.voiceChannel = null;
+    global.embed = null;
+    global.requests_channel_id = '777553955449470986'
 
     console.log(`Logged in as ${client.user.tag}!`);
 });
@@ -39,8 +41,9 @@ client.on('message', async message => {
     const args = message.content.slice(config.prefix.length).trim().split(/ +/);
     const command = args.shift().toLowerCase();
 
-    if(!client.commands.has(command))
+    if(!client.commands.has(command) || message.channel.id != requests_channel_id)
         return;
+    
     try
     {
         client.commands.get(command).execute(message, args);
@@ -49,27 +52,7 @@ client.on('message', async message => {
     {
         console.error(error)
         message.channel.send('Ошибка во время вызова команды :C')
-    }
-
-    //clients.commands.get('ping').execute(message, args)
-
-//     if (message.content === 'how to embed') {
-        
-//     const embed = new MessageEmbed()
-//       .setTitle('A slick little embed')
-//       .setColor(0xff0000)
-
-//     message.channel.send(embed);
-//   }
-
-//     if (message.content === 'dc')
-//     {
-//         if(!voiceChannel) return;
-
-//         voiceChannel.leave();
-//     }
-
-//     
+    }     
   }
 );
 
@@ -85,4 +68,5 @@ client.login(config["discord-token"]);
 // Add Repeat toggle
 // add .env usage instead of confing.json
 // add embed...
+// Ускорить удаление сообщения
 

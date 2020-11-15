@@ -6,7 +6,9 @@ module.exports = {
 	description: 'Skips the song',
     execute(message, args){
         
-        dispatcher.end();
+
+
+        dispatcher.finish();
         // if(!dispatcher){
         //     message.channel.send('Ничего не играет...'); return;}
         // if(!connection){
@@ -20,8 +22,7 @@ module.exports = {
         // QUEUE.shift();
         
         // }
-        message.channel.send('Пропускаем композицию...')
-        
 
+        message.delete();
     }
 };

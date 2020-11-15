@@ -5,7 +5,7 @@ module.exports = {
         if(dispatcher)
         {
             dispatcher.pause();
-            message.channel.send('!resume чтобы продолжить воспроизведение...');
+            message.delete();
         }
 	},
 };

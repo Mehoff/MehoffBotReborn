@@ -4,15 +4,16 @@ module.exports = {
 	execute(message, args) {
         if(dispatcher)
         {
-            var str = `Current: ${CURRENT}\n`
+            var str = `Current: ${CURRENT.title}\n`
             
             var i = 1;
             for(const item of QUEUE){
-                str += `${i}.${item}\n`;
+                str += `${i}.${item.title}\n`;
                 i+=1;
             }
 
             message.channel.send(str);
+            message.delete();
         }
 	},
 };
