@@ -44,7 +44,8 @@ client.on('message', async message => {
     const command = args.shift().toLowerCase();
 
     //                                                         music-player                                 bot-testing
-    if(!client.commands.has(command) || message.channel.id != '777553955449470986' || message.channel.id != '656574129373315143')
+   // if(!client.commands.has(command) || message.channel.id != '777553955449470986' || message.channel.id != '656574129373315143')
+   if(!client.commands.has(command) && message.channel.id === '777553955449470986')
         return;
     
     try

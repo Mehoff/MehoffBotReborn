@@ -18,6 +18,22 @@ function PlaySong(url)
 {
     var stream = ytdl(url, options);
     dispatcher = connection.play(stream);
+            
+    dispatcher.on('start', () => {console.log('dispatcher::start')})
+
+    dispatcher.on('finish', () => {
+
+        console.log('dispatcher::finish');
+    
+        if(repeat)
+            PlaySong(CURRENT.url)
+
+        else if(QUEUE.length == 0){ CURRENT = null; dispatcher.destroy(); connection.disconnect(); }
+        
+        else { CURRENT = QUEUE.shift(); PlaySong(CURRENT.url); }
+     })
+
+    dispatcher.on("error", (error) => console.log(error));
 }
 
 const options = 
@@ -73,20 +89,7 @@ module.exports = {
         CURRENT = QUEUE.shift();
         PlaySong(CURRENT.url);
 
-        
-        dispatcher.on('start', () => {console.log('dispatcher::start')})
 
-        dispatcher.on('finish', () => {
-
-            if(repeat)
-                PlaySong(CURRENT.url)
-
-            else if(QUEUE.length == 0){ CURRENT = null; dispatcher.destroy(); connection.disconnect(); }
-            
-            else { CURRENT = QUEUE.shift(); PlaySong(CURRENT.url); }
-         })
-
-        dispatcher.on("error", console.error);
 
         }
         message.channel.send(GenerateNewEmbed(song))
