@@ -1,17 +1,35 @@
 const Discord = require('discord.js');
 const ytdl = require('ytdl-core')
 
-function GenerateNewEmbed(song)
+async function UpdateEmbed(song)
 {
+    let newEmbed = new Discord.MessageEmbed;
+ 
+    newEmbed.setTitle(CURRENT.title)
+    newEmbed.setURL(CURRENT.url)
+    newEmbed.setColor('#8b00ff')
+    newEmbed.setThumbnail(CURRENT.thumbnail)
+    newEmbed.setFooter(`Текущий заказал: ${CURRENT.author}`)
 
-    let embed = new Discord.MessageEmbed;
-    embed.setTitle(song.title)
-    embed.setURL(song.url)
-    embed.setColor('#8b00ff')
-    embed.setImage(song.thumbnail)
-    embed.setFooter(`Заказал: ${song.author}`)
-
-    return embed;
+    // Потому что embed вмещает в себя не больше 25 field`ов
+    for(var i = 0; i < 25; i++)
+    {
+        if(QUEUE[i])
+            newEmbed.addField(QUEUE[i].title, `Заказал ${QUEUE[i].author}`)
+        else break;
+    }
+    
+    if(embed)
+    {
+        embed.edit(newEmbed)    
+    } else {
+        embed = await channel.send(newEmbed);
+        //embed.pin()
+        embed.react('⏯️')
+            .then(embed.react('⏭️'))
+            .then(embed.react('🔀'))
+            .then(embed.react('🔁'))
+    }
 }
 
 function PlaySong(url)
@@ -19,7 +37,9 @@ function PlaySong(url)
     var stream = ytdl(url, options);
     dispatcher = connection.play(stream);
             
-    dispatcher.on('start', () => {console.log('dispatcher::start')})
+    dispatcher.on('start', () => {
+        console.log('dispatcher::start')
+    })
 
     dispatcher.on('finish', () => {
 
@@ -28,20 +48,17 @@ function PlaySong(url)
         if(repeat)
             PlaySong(CURRENT.url)
 
-        else if(QUEUE.length == 0){ CURRENT = null; dispatcher.destroy(); connection.disconnect(); }
+        else if(QUEUE.length == 0){ CURRENT = null; dispatcher.destroy(); connection.disconnect(); embed.delete();}
         
-        else { CURRENT = QUEUE.shift(); PlaySong(CURRENT.url); }
+        else { CURRENT = QUEUE.shift(); PlaySong(CURRENT.url);}
+
+        if(CURRENT)
+            UpdateEmbed();
      })
 
     dispatcher.on("error", (error) => console.log(error));
 }
 
-const options = 
-{
-    filter: "audioonly",
-    dlChunkSize: 0,
-    highWaterMark: 1<<25,
-}
 
 module.exports = {
 
@@ -49,7 +66,13 @@ module.exports = {
     description: 'Plays audiostream',
 
     async execute(message, args) {
-    if(!ytdl.validateURL(args[0]))
+    
+    channel = message.channel;
+    let url = args[0];
+
+    console.log(url)
+
+    if(!ytdl.validateURL(url))
         {
             message.delete();
 
@@ -62,19 +85,19 @@ module.exports = {
         }
 
         let info = {};
-        let url = args[0];
         
         try{
-            info = await ytdl.getInfo(args[0]);
+            info = await ytdl.getInfo(url);
         }
         catch(error){
             console.error(error);
         }
         
+
         let song =
         {
             title: info.videoDetails.title,
-            thumbnail: info.videoDetails.thumbnail.thumbnails[0].url,
+            thumbnail: info.videoDetails.thumbnail.thumbnails[1].url,
             uploaded: info.videoDetails.uploadDate,
             url: url,
             author: message.author.username,
@@ -82,17 +105,13 @@ module.exports = {
 
         QUEUE.push(song);
 
-        if(CURRENT == null){
-        
-        connection = await message.member.voice.channel.join();
-
-        CURRENT = QUEUE.shift();
-        PlaySong(CURRENT.url);
-
-
-
+        if(CURRENT == null)
+        {
+            connection = await message.member.voice.channel.join();
+            CURRENT = QUEUE.shift();
+            PlaySong(CURRENT.url);
         }
-        message.channel.send(GenerateNewEmbed(song))
+        UpdateEmbed();
         message.delete()
     }  
     

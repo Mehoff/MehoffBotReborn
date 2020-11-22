@@ -1,6 +1,8 @@
 const Discord = require('discord.js');
 const { Client, MessageEmbed } = require('discord.js');
-const fs = require('fs')
+//const { repeat } = require('ffmpeg-static');
+const fs = require('fs');
+const pause = require('./commands/pause');
 global.client = new Client();
 const config = require('./config.json');
 
@@ -20,6 +22,7 @@ client.on('ready', () => {
     global.CURRENT = null;
     global.connection = null;    
     global.dispatcher = null;
+    global.channel = null;
 
     // Stream не нужен
     global.stream = null;
@@ -27,9 +30,17 @@ client.on('ready', () => {
     // VoiceChannel тоже не нужен...
     global.voiceChannel = null;
 
-    // Возможно тоже будет не нужен.
+    // embed нужно задать сообщение находящиеся в канале
     global.embed = null;
     global.repeat = false;
+    global.paused = false;
+
+    global.options = 
+    {
+        filter: "audioonly",
+        dlChunkSize: 0,
+        highWaterMark: 1<<25,
+    }
 
     console.log(`Logged in as ${client.user.tag}!`);
 });
@@ -43,8 +54,6 @@ client.on('message', async message => {
     const args = message.content.slice(config.prefix.length).trim().split(/ +/);
     const command = args.shift().toLowerCase();
 
-    //                                                         music-player                                 bot-testing
-   // if(!client.commands.has(command) || message.channel.id != '777553955449470986' || message.channel.id != '656574129373315143')
    if(!client.commands.has(command) && message.channel.id === '777553955449470986')
         return;
     
@@ -56,10 +65,51 @@ client.on('message', async message => {
     {
         console.error(error)
         message.channel.send('Ошибка во время вызова команды :C')
+            .then(msg => {msg.delete({timeout: 2000})})
     }     
   }
 );
 
+client.on('messageReactionAdd', async (reaction, user) =>{
+    if(user.bot)
+        return;
+
+    switch(reaction.emoji.name)
+    {
+        case '⏯️': 
+            if(!paused)
+            {
+                paused = true;
+                client.commands.get('pause').execute(reaction.message, null);
+            } else { 
+                paused = false;
+                client.commands.get('resume').execute(reaction.message,null); }
+            break;
+        case '⏭️': 
+                client.commands.get('skip').execute(reaction.message, null);
+            break;
+        case '🔀': 
+                client.commands.get('shuffle').execute(reaction.message, null);   
+            break;
+        case '🔁':
+        // Переделать на embed.edit(...)
+            if(!repeat)
+            {
+                repeat = true;
+                await reaction.message.channel.send('Повтор ON')
+                    .then(msg => {msg.delete({timeout : 2000})})
+            } else {
+
+                repeat = false;
+                await reaction.message.channel.send('Повтор OFF')
+                    .then(msg => {msg.delete({timeout : 2000})})
+            }
+            break;
+    }
+
+    if(embed)
+        embed.reactions.resolve(reaction).users.remove(user.id);
+})
 
 client.login(config["discord-token"]);
 
@@ -74,6 +124,6 @@ client.login(config["discord-token"]);
 // add embed...
 // асинхронная работа с ytdl, embed чтобы убрать подлаг при доблавлении нового трека 
 // переместить опции ytdl в ytdl-options.json и настроить их работу
-// сделать PlayMusic глобальной функцией
+// node-ytpl
 
 
