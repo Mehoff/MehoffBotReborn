@@ -48,7 +48,7 @@ function PlaySong(url)
         if(repeat)
             PlaySong(CURRENT.url)
 
-        else if(QUEUE.length == 0){ CURRENT = null; dispatcher.destroy(); connection.disconnect(); embed.delete();}
+        else if(QUEUE.length == 0){ CURRENT = null; dispatcher.destroy(); connection.disconnect(); embed.delete(); embed = null;}
         
         else { CURRENT = QUEUE.shift(); PlaySong(CURRENT.url);}
 

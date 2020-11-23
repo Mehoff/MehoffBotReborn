@@ -1,8 +1,7 @@
 const Discord = require('discord.js');
 const { Client, MessageEmbed } = require('discord.js');
-//const { repeat } = require('ffmpeg-static');
+const { endsWith } = require('ffmpeg-static');
 const fs = require('fs');
-const pause = require('./commands/pause');
 global.client = new Client();
 const config = require('./config.json');
 
@@ -56,7 +55,6 @@ client.on('message', async message => {
 
    if(!client.commands.has(command) && message.channel.id === '777553955449470986')
         return;
-    
     try
     {
         client.commands.get(command).execute(message, args);
@@ -81,9 +79,13 @@ client.on('messageReactionAdd', async (reaction, user) =>{
             {
                 paused = true;
                 client.commands.get('pause').execute(reaction.message, null);
+                embed.setTitle(CURRENT.title + '[Пауза]')
+                
             } else { 
                 paused = false;
-                client.commands.get('resume').execute(reaction.message,null); }
+                client.commands.get('resume').execute(reaction.message,null); 
+                embed.setTitle(CURRENT.title);
+            }
             break;
         case '⏭️': 
                 client.commands.get('skip').execute(reaction.message, null);
@@ -96,13 +98,11 @@ client.on('messageReactionAdd', async (reaction, user) =>{
             if(!repeat)
             {
                 repeat = true;
-                await reaction.message.channel.send('Повтор ON')
-                    .then(msg => {msg.delete({timeout : 2000})})
+                embed.setFooter(`Текущий заказал: ${CURRENT.author} - [НА ПОВТОРЕ]`)
             } else {
 
                 repeat = false;
-                await reaction.message.channel.send('Повтор OFF')
-                    .then(msg => {msg.delete({timeout : 2000})})
+                embed.setFooter(`Текущий заказал: ${CURRENT.author}`)
             }
             break;
     }
