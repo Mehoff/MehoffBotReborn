@@ -106,7 +106,7 @@ module.exports = {
                 title: 'undefined',
                 thumbnail: 'undefined',
                 uploaded: 'undefined',
-                url: null,
+                url: url,
                 author: 'undefined',
             }
             console.error(error);
