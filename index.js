@@ -94,7 +94,6 @@ client.on('messageReactionAdd', async (reaction, user) =>{
                 client.commands.get('shuffle').execute(reaction.message, null);   
             break;
         case '🔁':
-        // Переделать на embed.edit(...)
             if(!repeat)
             {
                 repeat = true;

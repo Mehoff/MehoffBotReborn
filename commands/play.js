@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const ytdl = require('ytdl-core')
 
-async function UpdateEmbed(song)
+async function UpdateEmbed()
 {
     let newEmbed = new Discord.MessageEmbed;
  
@@ -24,7 +24,6 @@ async function UpdateEmbed(song)
         embed.edit(newEmbed)    
     } else {
         embed = await channel.send(newEmbed);
-        //embed.pin()
         embed.react('⏯️')
             .then(embed.react('⏭️'))
             .then(embed.react('🔀'))
@@ -85,24 +84,34 @@ module.exports = {
         }
 
         let info = {};
+        let song = {};
         
-        try{
+        try
+        {
             info = await ytdl.getInfo(url);
+            song =
+            {
+                title: info.videoDetails.title,
+                thumbnail: info.videoDetails.thumbnail.thumbnails[1].url,
+                uploaded: info.videoDetails.uploadDate,
+                url: url,
+                author: message.author.username,
+            };
+    
         }
         catch(error){
+            message.channel.send('Ошибка библиотеки ytdl. Авторы заебали ей богу')
+            song = 
+            {
+                title: 'undefined',
+                thumbnail: 'undefined',
+                uploaded: 'undefined',
+                url: null,
+                author: 'undefined',
+            }
             console.error(error);
         }
         
-
-        let song =
-        {
-            title: info.videoDetails.title,
-            thumbnail: info.videoDetails.thumbnail.thumbnails[1].url,
-            uploaded: info.videoDetails.uploadDate,
-            url: url,
-            author: message.author.username,
-        };
-
         QUEUE.push(song);
 
         if(CURRENT == null)

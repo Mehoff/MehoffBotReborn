@@ -2,7 +2,7 @@ const ytdl = require('ytdl-core')
 const Discord = require("discord.js");
 
 
-async function UpdateEmbed(song)
+async function UpdateEmbed()
 {
     let newEmbed = new Discord.MessageEmbed;
  
@@ -25,7 +25,6 @@ async function UpdateEmbed(song)
         embed.edit(newEmbed)    
     } else {
         embed = await channel.send(newEmbed);
-        embed.pin()
         embed.react('⏯️')
             .then(embed.react('⏭️'))
             .then(embed.react('🔀'))
