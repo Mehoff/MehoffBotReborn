@@ -79,12 +79,12 @@ client.on('messageReactionAdd', async (reaction, user) =>{
             {
                 paused = true;
                 client.commands.get('pause').execute(reaction.message, null);
-                embed.setTitle(CURRENT.title + '[Пауза]')
+                //embed.setTitle(CURRENT.title + '[Пауза]')
                 
             } else { 
                 paused = false;
                 client.commands.get('resume').execute(reaction.message,null); 
-                embed.setTitle(CURRENT.title);
+                //embed.setTitle(CURRENT.title);
             }
             break;
         case '⏭️': 
@@ -97,11 +97,11 @@ client.on('messageReactionAdd', async (reaction, user) =>{
             if(!repeat)
             {
                 repeat = true;
-                embed.setFooter(`Текущий заказал: ${CURRENT.author} - [НА ПОВТОРЕ]`)
+                //embed.setFooter(`Текущий заказал: ${CURRENT.author} - [НА ПОВТОРЕ]`)
             } else {
 
                 repeat = false;
-                embed.setFooter(`Текущий заказал: ${CURRENT.author}`)
+                //embed.setFooter(`Текущий заказал: ${CURRENT.author}`)
             }
             break;
     }
