@@ -117,12 +117,14 @@ client.login(config["discord-token"]);
 //  TODO:  \\
 
 // GET Metainfo from ytdl for rich interface
-// MongoDB for personal playlists
-// Add Repeat toggle
-// add .env usage instead of confing.json
+// MongoDB for personal playlists and more
 // add embed...
-// асинхронная работа с ytdl, embed чтобы убрать подлаг при доблавлении нового трека 
-// переместить опции ytdl в ytdl-options.json и настроить их работу
+// .evn support
 // node-ytpl
-
+// асинхронная работа с ytdl, embed чтобы убрать подлаг при доблавлении нового трека
+// skip last
+// skip front
+// search {Название трека} {Кол-во результатов}
+// play {Название трека}
+// playlist
 

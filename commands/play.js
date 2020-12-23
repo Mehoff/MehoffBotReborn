@@ -1,5 +1,8 @@
 const Discord = require('discord.js');
 const ytdl = require('ytdl-core')
+const API  = require('simple-youtube-api');
+const youtube = new API(require('../config.json')['youtube-api-key'])
+
 
 async function UpdateEmbed()
 {
@@ -29,6 +32,56 @@ async function UpdateEmbed()
             .then(embed.react('🔀'))
             .then(embed.react('🔁'))
     }
+}
+
+async function GetSong(message, args)
+{
+    return new Promise(function(resolve, reject){
+        var info = {}
+        var song = {}
+    
+        try{
+        if(!ytdl.validateURL(args[0]))
+        {
+            youtube.searchVideos(args.join(' '), 1)
+                .then(result => {
+                    info = ytdl.getInfo(result[0].url)
+                        .then(info =>{
+                            song =
+                            {
+                                title: info.videoDetails.title,
+                                thumbnail: info.videoDetails.thumbnail.thumbnails[1].url,
+                                uploaded: info.videoDetails.uploadDate,
+                                url: result[0].url,
+                                author: message.author.username,
+                            };
+    
+                            resolve(song);
+                        })
+                })
+        } else {
+            var url = args[0];
+            info = ytdl.getInfo(url)
+                .then(info =>{
+                    song =
+                    {
+                        title: info.videoDetails.title,
+                        thumbnail: info.videoDetails.thumbnail.thumbnails[1].url,
+                        uploaded: info.videoDetails.uploadDate,
+                        url: result[0].url,
+                        author: message.author.username,
+                    };
+    
+                    resolve(song);
+                })
+        }
+    }
+    catch(e)
+    {
+        reject(e)
+    }
+    })
+
 }
 
 function PlaySong(url)
@@ -67,61 +120,22 @@ module.exports = {
     async execute(message, args) {
     
     channel = message.channel;
-    let url = args[0];
-
-    console.log(url)
-
-    if(!ytdl.validateURL(url))
-        {
-            message.delete();
-
-            message.channel.send('Неверная ссылка')
-                .then(msg => {
-                    msg.delete({timeout: 2000});
-                })
-
-            return;
-        }
-
-        let info = {};
-        let song = {};
-        
-        try
-        {
-            info = await ytdl.getInfo(url);
-            song =
-            {
-                title: info.videoDetails.title,
-                thumbnail: info.videoDetails.thumbnail.thumbnails[1].url,
-                uploaded: info.videoDetails.uploadDate,
-                url: url,
-                author: message.author.username,
-            };
+    connection = await message.member.voice.channel.join();
     
-        }
-        catch(error){
-            message.channel.send('Ошибка библиотеки ytdl. Авторы заебали ей богу')
-            song = 
-            {
-                title: 'undefined',
-                thumbnail: 'undefined',
-                uploaded: 'undefined',
-                url: url,
-                author: 'undefined',
-            }
-            console.error(error);
-        }
-        
+    GetSong(message, args)
+        .then(song =>{
+
         QUEUE.push(song);
 
-        if(CURRENT == null)
-        {
-            connection = await message.member.voice.channel.join();
-            CURRENT = QUEUE.shift();
-            PlaySong(CURRENT.url);
-        }
-        UpdateEmbed();
-        message.delete()
+        if(CURRENT == null) 
+            {
+                CURRENT = QUEUE.shift();
+                PlaySong(CURRENT.url);
+            }
+
+            UpdateEmbed();
+            message.delete()
+        })
     }  
     
 };
