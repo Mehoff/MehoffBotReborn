@@ -12,6 +12,8 @@
     "discord.js": "^12.4.1",
     "ffmpeg-static": "^4.2.7",
     "opusscript": "0.0.7",
-    "ytdl-core": "^4.0.3"
+    "simple-youtube-api": "^5.2.1",
+    "ytdl-core": "^4.1.0",
+    "ytpl": "^1.0.1"
   }
 }
