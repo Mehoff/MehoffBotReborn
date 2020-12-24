@@ -125,6 +125,5 @@ client.login(config["discord-token"]);
 // skip last
 // skip front
 // search {Название трека} {Кол-во результатов}
-// play {Название трека}
 // playlist
 

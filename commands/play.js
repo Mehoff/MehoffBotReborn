@@ -68,7 +68,7 @@ async function GetSong(message, args)
                         title: info.videoDetails.title,
                         thumbnail: info.videoDetails.thumbnail.thumbnails[1].url,
                         uploaded: info.videoDetails.uploadDate,
-                        url: result[0].url,
+                        url: url,
                         author: message.author.username,
                     };
     
