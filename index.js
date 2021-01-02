@@ -53,8 +53,15 @@ client.on('message', async message => {
     const args = message.content.slice(config.prefix.length).trim().split(/ +/);
     const command = args.shift().toLowerCase();
 
-   if(!client.commands.has(command) && message.channel.id === '777553955449470986')
+    //    if(!client.commands.has(command) && message.channel.id === '777553955449470986')   
+    //     return;
+   
+    if(message.channel.id != '777553955449470986'){
+        message.channel.send('Перейди в канал music-player!').then(msg => {msg.delete({timeout: 2000})})
+        message.delete();
         return;
+    }
+
     try
     {
         client.commands.get(command).execute(message, args);
@@ -64,7 +71,8 @@ client.on('message', async message => {
         console.error(error)
         message.channel.send('Ошибка во время вызова команды :C')
             .then(msg => {msg.delete({timeout: 2000})})
-    }     
+    }
+    //message.delete()     
   }
 );
 

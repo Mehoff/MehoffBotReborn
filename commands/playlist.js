@@ -2,6 +2,8 @@ const ytpl = require('ytpl')
 const config = require('../config.json');
 const SimpleYoutubeApi = require('simple-youtube-api')
 const syapi = new SimpleYoutubeApi(config['youtube-api-key'])
+
+
 module.exports = 
 {
     name: 'playlist',

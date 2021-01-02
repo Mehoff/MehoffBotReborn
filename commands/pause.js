@@ -1,6 +1,8 @@
 module.exports = {
 	name: 'pause',
-	description: 'Pauses current song',
+        description: 'Pauses current song',
+        aliases: ['зфгыу'],
+
 	execute(message, args) {
         if(dispatcher)
         {
