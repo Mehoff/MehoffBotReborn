@@ -10,6 +10,7 @@ module.exports =
 {
     name: 'help',
     description: 'Помощь с командами',
+    aliases: ['рудз'],
 
     async execute(message, args)
     {

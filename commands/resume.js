@@ -1,6 +1,8 @@
 module.exports = {
 	name: 'resume',
-	description: 'Pauses current song',
+        description: 'Resumes current song',
+        alliases: ['куыгьу'],
+
 	execute(message, args) {
         if(dispatcher)
         {
