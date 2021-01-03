@@ -9,6 +9,10 @@ async function ClearMessages(channel, limit)
         try{
             channel.messages.fetch({limit: limit})
             .then(msgs => {
+                if(msgs.size === 1){
+                    console.log('No messages to clear up')
+                    resolve('0')
+                }
                 channel.bulkDelete(msgs)
                     .then((deletedMessages) => {
                         resolve(deletedMessages.size)

@@ -37,13 +37,13 @@ async function UpdateEmbed()
         embed.edit(newEmbed)    
     } else {
 
-        ClearMessages(channel, 99).then(async deletedMessagesCount => {
-            console.log(`Deleted ${deletedMessagesCount} messages`)
+        //ClearMessages(channel, 99).then(async deletedMessagesCount => {
+            //console.log(`Deleted ${deletedMessagesCount} messages`)
             embed = await channel.send(newEmbed);
             embed.react('⏯️')
                 .then(embed.react('⏭️'))
                 .then(embed.react('🔀'))
                 .then(embed.react('🔁'))
-        })
+        //})
     }
 }
