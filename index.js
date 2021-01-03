@@ -45,14 +45,17 @@ client.on('ready', () => {
 
 client.on('message', async message => {
   
-    if(!message.content.startsWith(config.prefix) || message.author.bot)
+    if(!message.content.startsWith(config.prefix) || message.author.bot){
+        message.delete();
         return;
+    }
     
     const args = message.content.slice(config.prefix.length).trim().split(/ +/);
     const command = args.shift().toLowerCase();
 
-    if(message.channel.id != '777553955449470986' || !client.commands.has(command) || !command){
-        await message.delete(); return;
+    if(message.channel.id != '777553955449470986' || !client.commands.has(command)){
+        message.delete(); 
+        return;
     }
 
     try {
