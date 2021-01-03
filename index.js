@@ -1,11 +1,10 @@
 const Discord = require('discord.js');
-const { Client, MessageEmbed } = require('discord.js');
-const { endsWith } = require('ffmpeg-static');
+const { Client } = require('discord.js');
 const fs = require('fs');
-global.client = new Client();
 const config = require('./config.json');
+const { UpdateEmbed } = require('./functions/updateEmbed');
 
-
+global.client = new Client();
 client.commands = new Discord.Collection();
 
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
@@ -29,7 +28,6 @@ client.on('ready', () => {
     // VoiceChannel тоже не нужен...
     global.voiceChannel = null;
 
-    // embed нужно задать сообщение находящиеся в канале
     global.embed = null;
     global.repeat = false;
     global.paused = false;
@@ -53,26 +51,19 @@ client.on('message', async message => {
     const args = message.content.slice(config.prefix.length).trim().split(/ +/);
     const command = args.shift().toLowerCase();
 
-    //    if(!client.commands.has(command) && message.channel.id === '777553955449470986')   
-    //     return;
-   
-    if(message.channel.id != '777553955449470986'){
-        message.channel.send('Перейди в канал music-player!').then(msg => {msg.delete({timeout: 2000})})
-        message.delete();
-        return;
+    if(message.channel.id != '777553955449470986' || !client.commands.has(command) || !command){
+        await message.delete(); return;
     }
 
-    try
-    {
+    try {
         client.commands.get(command).execute(message, args);
     }
-    catch(error)
-    {
+    
+    catch(error) {
         console.error(error)
         message.channel.send('Ошибка во время вызова команды :C')
             .then(msg => {msg.delete({timeout: 2000})})
     }
-    //message.delete()     
   }
 );
 
@@ -87,12 +78,10 @@ client.on('messageReactionAdd', async (reaction, user) =>{
             {
                 paused = true;
                 client.commands.get('pause').execute(reaction.message, null);
-                //embed.setTitle(CURRENT.title + '[Пауза]')
                 
             } else { 
                 paused = false;
                 client.commands.get('resume').execute(reaction.message,null); 
-                //embed.setTitle(CURRENT.title);
             }
             break;
         case '⏭️': 
@@ -103,19 +92,17 @@ client.on('messageReactionAdd', async (reaction, user) =>{
             break;
         case '🔁':
             if(!repeat)
-            {
                 repeat = true;
-                //embed.setFooter(`Текущий заказал: ${CURRENT.author} - [НА ПОВТОРЕ]`)
-            } else {
-
+            else 
                 repeat = false;
-                //embed.setFooter(`Текущий заказал: ${CURRENT.author}`)
-            }
+
+            UpdateEmbed();
             break;
     }
 
     if(embed)
         embed.reactions.resolve(reaction).users.remove(user.id);
+    
 })
 
 client.login(config["discord-token"]);

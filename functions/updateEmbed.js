@@ -3,12 +3,22 @@ module.exports = {
 };
 
 const Discord = require("discord.js");
+const { ClearMessages } =  require('../functions/clearMessages');
 
 async function UpdateEmbed()
 {
+    if(!CURRENT){console.log("CURRENT is not defined"); return;}
+
     let newEmbed = new Discord.MessageEmbed;
- 
-    newEmbed.setTitle(CURRENT.title)
+    var title = '';
+    if(paused)
+        title += '⏸️'
+    if(repeat)
+        title += '🔁'
+    
+    title += CURRENT.title
+
+    newEmbed.setTitle(title)
     newEmbed.setURL(CURRENT.url)
     newEmbed.setColor('#8b00ff')
     newEmbed.setThumbnail(CURRENT.thumbnail)
@@ -26,10 +36,14 @@ async function UpdateEmbed()
     {
         embed.edit(newEmbed)    
     } else {
-        embed = await channel.send(newEmbed);
-        embed.react('⏯️')
-            .then(embed.react('⏭️'))
-            .then(embed.react('🔀'))
-            .then(embed.react('🔁'))
+
+        ClearMessages(channel, 99).then(async deletedMessagesCount => {
+            console.log(`Deleted ${deletedMessagesCount} messages`)
+            embed = await channel.send(newEmbed);
+            embed.react('⏯️')
+                .then(embed.react('⏭️'))
+                .then(embed.react('🔀'))
+                .then(embed.react('🔁'))
+        })
     }
 }

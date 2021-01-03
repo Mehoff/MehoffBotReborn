@@ -1,3 +1,5 @@
+const { UpdateEmbed } = require("../functions/updateEmbed");
+
 module.exports = {
 	name: 'resume',
         description: 'Resumes current song',
@@ -7,6 +9,7 @@ module.exports = {
         if(dispatcher)
         {
             dispatcher.resume();
+            UpdateEmbed()
 
             if(message.content)
                 message.delete();

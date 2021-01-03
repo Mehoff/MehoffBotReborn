@@ -8,8 +8,9 @@ const ytdl = require('ytdl-core')
 function PlaySong(url)
 {
     var stream = ytdl(url, options);
+
     dispatcher = connection.play(stream);
-            
+    
     dispatcher.on('start', () => {
         console.log('dispatcher::start')
     })
@@ -21,7 +22,12 @@ function PlaySong(url)
         if(repeat)
             PlaySong(CURRENT.url)
 
-        else if(QUEUE.length == 0){ CURRENT = null; dispatcher.destroy(); connection.disconnect(); embed.delete(); embed = null;}
+        else if(QUEUE.length == 0)
+        {
+            CURRENT = null; 
+            dispatcher.destroy();
+            connection.disconnect();
+        }
         
         else { CURRENT = QUEUE.shift(); PlaySong(CURRENT.url);}
 
