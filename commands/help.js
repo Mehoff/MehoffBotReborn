@@ -1,10 +1,9 @@
 const Discord = require('discord.js');
 
 
-//
-let help_embed = new Discord.MessageEmbed()
+var help_embed = new Discord.MessageEmbed()
     .setThumbnail()
-    .setDescription('Тут будет help :)')
+    .setDescription()
 
 module.exports = 
 {
@@ -14,7 +13,8 @@ module.exports =
 
     async execute(message, args)
     {
-        await message.channel.send(help_embed);
-            message.delete();
+        await message.author.send('Тест');
+        
+        message.delete();
     }
 }
