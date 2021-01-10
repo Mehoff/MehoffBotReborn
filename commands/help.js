@@ -1,4 +1,5 @@
 
+const Discord = require('discord.js')
 
 var help_embed = new Discord.MessageEmbed()
     .setThumbnail()
