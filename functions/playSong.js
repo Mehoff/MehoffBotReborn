@@ -2,6 +2,8 @@ module.exports = {
     PlaySong
 };
 
+const { UpdateEmbed } = require('../functions/updateEmbed');
+
 const ytdl = require('ytdl-core')
 
 

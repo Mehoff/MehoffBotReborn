@@ -1,4 +1,3 @@
-const Discord = require('discord.js');
 
 
 var help_embed = new Discord.MessageEmbed()
@@ -13,7 +12,7 @@ module.exports =
 
     async execute(message, args)
     {
-        await message.author.send('Тест');
+        await message.author.send(GetHelpEmbed());
         
         message.delete();
     }
