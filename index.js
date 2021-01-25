@@ -45,6 +45,7 @@ client.on('ready', () => {
 
 client.on('message', async message => {
   
+    // if message has embed.
     if(!message.content.startsWith(config.prefix) || message.author.bot)
         return;
     
