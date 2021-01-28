@@ -1,6 +1,8 @@
 const { PlaySong } = require('../functions/playSong.js');
-const { UpdateEmbed } = require('../functions/updateEmbed.js');
+const { UpdateEmbed, GetHistoryEmbed } = require('../functions/updateEmbed.js');
 const { GetSong } = require('../functions/getSong.js');
+
+const music_history = '804284091938766908'
 
 module.exports = {
 
@@ -14,7 +16,7 @@ module.exports = {
     connection = await message.member.voice.channel.join();
     
     GetSong(message, args)
-        .then(song =>{
+        .then(async song =>{
 
         QUEUE.push(song);
 
@@ -25,8 +27,10 @@ module.exports = {
             }
 
             UpdateEmbed();
+
+            await message.client.channels.cache.get(music_history).send(await GetHistoryEmbed(song))
+
             message.delete()
         })
     }  
-    
 };

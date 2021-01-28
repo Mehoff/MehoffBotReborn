@@ -11,5 +11,7 @@ module.exports =
         await ClearMessages(message.channel, 99).then(deletedMessagesCount => {
             console.log(`Deleted ${deletedMessagesCount} messages`)
         })
+
+        embed = null;
     }
 }

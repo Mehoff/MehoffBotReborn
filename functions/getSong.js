@@ -14,7 +14,8 @@ async function GetSong(message, args)
         var info = {}
         var song = {}
     
-        try{
+        try
+        {
         if(!ytdl.validateURL(args[0]))
         {
             youtube.searchVideos(args.join(' '), 1)
@@ -40,7 +41,7 @@ async function GetSong(message, args)
                     song =
                     {
                         title: info.videoDetails.title,
-                        thumbnail: info.videoDetails.thumbnail.thumbnails[1].url,
+                        thumbnail: info.videoDetails.thumbnails[1].url,
                         uploaded: info.videoDetails.uploadDate,
                         url: url,
                         author: message.author.username,

@@ -22,6 +22,7 @@ client.on('ready', () => {
     global.dispatcher = null;
     global.channel = null;
 
+
     // Stream не нужен
     global.stream = null;
     
@@ -39,6 +40,7 @@ client.on('ready', () => {
         highWaterMark: 1<<25,
     }
 
+    
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
@@ -72,6 +74,14 @@ client.on('messageReactionAdd', async (reaction, user) =>{
     if(user.bot)
         return;
 
+    if(embed)
+        embed.reactions.resolve(reaction).users.remove(user.id);
+
+    if(!CURRENT)
+    {
+        client.commands.get('play').execute(reaction.message, reaction.message.embeds[0].url)
+    }
+
     switch(reaction.emoji.name)
     {
         case '⏯️': 
@@ -100,9 +110,6 @@ client.on('messageReactionAdd', async (reaction, user) =>{
             UpdateEmbed();
             break;
     }
-
-    if(embed)
-        embed.reactions.resolve(reaction).users.remove(user.id);
     
 })
 

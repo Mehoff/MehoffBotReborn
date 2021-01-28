@@ -9,9 +9,11 @@ const ytdl = require('ytdl-core')
 
 function PlaySong(url)
 {
-    var stream = ytdl(url, options);
+    try
+    {
+        var stream = ytdl(url, options);
+        dispatcher = connection.play(stream);
 
-    dispatcher = connection.play(stream);
     
     dispatcher.on('start', () => {
         console.log('dispatcher::start')
@@ -38,4 +40,10 @@ function PlaySong(url)
      })
 
     dispatcher.on("error", (error) => console.log(error));
+
+}
+catch(error)
+{
+    console.log('ytdl error')
+}
 }

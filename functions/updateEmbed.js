@@ -1,9 +1,8 @@
 module.exports = {
-    UpdateEmbed
+    UpdateEmbed, GetHistoryEmbed
 };
 
 const Discord = require("discord.js");
-const { ClearMessages } =  require('../functions/clearMessages');
 
 async function UpdateEmbed()
 {
@@ -36,14 +35,24 @@ async function UpdateEmbed()
     {
         embed.edit(newEmbed)    
     } else {
-
-        //ClearMessages(channel, 99).then(async deletedMessagesCount => {
-            //console.log(`Deleted ${deletedMessagesCount} messages`)
             embed = await channel.send(newEmbed);
             embed.react('⏯️')
                 .then(embed.react('⏭️'))
                 .then(embed.react('🔀'))
                 .then(embed.react('🔁'))
-        //})
     }
+}
+
+async function GetHistoryEmbed(song)
+{
+    let embed = new Discord.MessageEmbed
+
+    embed.setTitle(`${song.title}`)
+    embed.setURL(song.url);
+    embed.setColor('#8b00ff')
+    embed.setThumbnail(song.thumbnail);
+    embed.setFooter(`Заказал ${song.author}`)
+
+    return embed;
+
 }
