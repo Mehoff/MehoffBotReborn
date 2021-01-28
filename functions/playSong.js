@@ -2,10 +2,11 @@ module.exports = {
     PlaySong
 };
 
-const { UpdateEmbed } = require('../functions/updateEmbed');
+const { UpdateEmbed, GetHistoryEmbed } = require('../functions/updateEmbed');
 const { GetNextRelated } = require('../functions/getNextRelated');
 const { GetSongByYTLink } = require('../functions/getSong');
 
+const music_history = '804284091938766908'
 const ytdl = require('ytdl-core')
 
 
@@ -16,9 +17,10 @@ async function PlaySong(url)
     dispatcher = connection.play(stream);
 
 
-    dispatcher.on('start', () => {
+    dispatcher.on('start', async () => {
         console.log('dispatcher::start')
         client.user.setActivity(`${CURRENT.title}`, {type: 'PLAYING'})
+        client.channels.cache.get(music_history).send(await GetHistoryEmbed(CURRENT))
     })
 
     dispatcher.on('finish', async () => {

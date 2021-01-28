@@ -2,7 +2,7 @@ const { PlaySong } = require('../functions/playSong.js');
 const { UpdateEmbed, GetHistoryEmbed } = require('../functions/updateEmbed.js');
 const { GetSong } = require('../functions/getSong.js');
 
-const music_history = '804284091938766908'
+
 
 module.exports = {
 
@@ -34,7 +34,7 @@ module.exports = {
             UpdateEmbed();
 
 
-            await message.client.channels.cache.get(music_history).send(await GetHistoryEmbed(song))
+            //await message.client.channels.cache.get(music_history).send(await GetHistoryEmbed(song))
                 //.then(history_embed => history_embed.react('▶️'));
 
             message.delete()
