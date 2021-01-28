@@ -24,7 +24,7 @@ async function GetSong(message, args)
                             song =
                             {
                                 title: info.videoDetails.title,
-                                thumbnail: info.videoDetails.thumbnail.thumbnails[1].url,
+                                thumbnail: info.videoDetails.thumbnails[1].url,
                                 uploaded: info.videoDetails.uploadDate,
                                 url: result[0].url,
                                 author: message.author.username,
