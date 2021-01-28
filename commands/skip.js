@@ -21,7 +21,6 @@ module.exports = {
             CURRENT = QUEUE.shift();
             PlaySong(CURRENT.url);
             UpdateEmbed();
-
         }
         else if(radio)
         {

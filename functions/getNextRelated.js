@@ -15,7 +15,7 @@ async function GetNextRelated(url)
         try
         {
             console.log(`GetNextRelated to: ${url}`)
-            var id = ytdl.getVideoID(url);
+            var id = ytdl.getVideoID(url);  
             var reqLink = `https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId=${id}&type=video&maxResults=${maxResults}&key=${ytKey}`;
         
             fetch(reqLink)

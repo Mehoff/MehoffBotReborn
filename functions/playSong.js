@@ -36,7 +36,7 @@ async function PlaySong(url)
                 .then(async nextSongLink => await GetSongByYTLink(nextSongLink)
                     .then(song => {
                         CURRENT = song;
-                        PlaySong(CURRENT);
+                        PlaySong(CURRENT.url);
                 }))
          }
         else if(QUEUE.length == 0)
