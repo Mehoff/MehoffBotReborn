@@ -3,11 +3,13 @@ module.exports = {
 };
 
 const { UpdateEmbed } = require('../functions/updateEmbed');
+const { GetNextRelated } = require('../functions/getNextRelated');
+const { GetSongByYTLink } = require('../functions/getSong');
 
 const ytdl = require('ytdl-core')
 
 
-function PlaySong(url)
+async function PlaySong(url)
 {
 
     var stream = ytdl(url, options);
@@ -19,13 +21,22 @@ function PlaySong(url)
         client.user.setActivity(`${CURRENT.title}`, {type: 'PLAYING'})
     })
 
-    dispatcher.on('finish', () => {
+    dispatcher.on('finish', async () => {
 
         console.log('dispatcher::finish');
     
         if(repeat)
             PlaySong(CURRENT.url)
 
+         else if(radio)
+         {
+             await GetNextRelated(CURRENT.url)
+                .then(async nextSongLink => await GetSongByYTLink(nextSongLink)
+                    .then(song => {
+                        CURRENT = song;
+                        PlaySong(CURRENT);
+                }))
+         }
         else if(QUEUE.length == 0)
         {
             CURRENT = null; 

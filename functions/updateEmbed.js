@@ -10,6 +10,8 @@ async function UpdateEmbed()
 
     let newEmbed = new Discord.MessageEmbed;
     var title = '';
+    if(radio)
+        title += '📻'
     if(paused)
         title += '⏸️'
     if(repeat)

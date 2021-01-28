@@ -1,5 +1,5 @@
 module.exports = {
-    GetSong
+    GetSong, GetSongByYTLink
 };
 
 
@@ -57,4 +57,39 @@ async function GetSong(message, args)
     }
     })
 
+}
+
+async function GetSongByYTLink(link)
+{
+    return new Promise(function(resolve, reject){
+
+        var info = {}
+        var song = {}
+    try
+    {
+
+        console.log(`GetSongByYTLink: ${link}`)
+        if(!ytdl.validateURL(link))
+            reject();
+
+        info = ytdl.getInfo(link)
+            .then(res => {
+                song = {
+                    title: res.videoDetails.title,
+                    thumbnail: res.videoDetails.thumbnails[1].url,
+                    uploaded: res.videoDetails.uploadDate,
+                    url: link,
+                    author: 'Радио',
+                };
+
+
+                console.log(song);
+                resolve(song);
+    })
+    }
+    catch(e)
+    {
+        reject(e)
+    }
+})
 }

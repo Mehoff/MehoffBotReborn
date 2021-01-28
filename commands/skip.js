@@ -1,3 +1,5 @@
+const { GetNextRelated } = require('../functions/getNextRelated.js');
+const { GetSongByYTLink } = require('../functions/getSong.js');
 const { PlaySong } = require('../functions/playSong.js');
 const { UpdateEmbed } = require('../functions/updateEmbed.js');
 
@@ -6,7 +8,7 @@ module.exports = {
     description: 'Skips the song',
     alliases: ['ылшз'],
 
-    execute(message, args){
+    async execute(message, args){
         
         if(message.content)
             message.delete();
@@ -20,7 +22,19 @@ module.exports = {
             PlaySong(CURRENT.url);
             UpdateEmbed();
 
-        } else {
+        }
+        else if(radio)
+        {
+            await GetNextRelated(CURRENT.url)
+                .then(async related => await GetSongByYTLink(related)
+                    .then(song => {
+                        CURRENT = song;
+                        PlaySong(CURRENT.url)
+                        UpdateEmbed();
+                }))
+        } 
+        else
+        {
             dispatcher.destroy();
             connection.disconnect();
             CURRENT = null;

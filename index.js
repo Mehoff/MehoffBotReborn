@@ -118,9 +118,10 @@ client.on('messageReactionAdd', async (reaction, user) =>{
             break;
         case '📻':
             radio = !radio;
-            reaction.message.channel.send('Радио находится в разработке...', {files: ['https://emoji.gg/assets/emoji/9716_Pepega.png']})
-                .then(msg => {msg.delete({timeout: 2000})})
-            break;
+            UpdateEmbed();
+            // reaction.message.channel.send('Радио находится в разработке...', {files: ['https://emoji.gg/assets/emoji/9716_Pepega.png']})
+            //     .then(msg => {msg.delete({timeout: 2000})})
+             break;
 
     }
     
