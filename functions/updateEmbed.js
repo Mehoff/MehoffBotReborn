@@ -17,7 +17,7 @@ async function UpdateEmbed()
     
     title += CURRENT.title
 
-    newEmbed.setTitle(title)
+    newEmbed.setTitle(`**${title}**`)
     newEmbed.setURL(CURRENT.url)
     newEmbed.setColor('#8b00ff')
     newEmbed.setThumbnail(CURRENT.thumbnail)
@@ -40,19 +40,20 @@ async function UpdateEmbed()
                 .then(embed.react('⏭️'))
                 .then(embed.react('🔀'))
                 .then(embed.react('🔁'))
+                .then(embed.react('📻'))
     }
 }
 
 async function GetHistoryEmbed(song)
 {
-    let embed = new Discord.MessageEmbed
+    let historyembed = new Discord.MessageEmbed
 
-    embed.setTitle(`${song.title}`)
-    embed.setURL(song.url);
-    embed.setColor('#8b00ff')
-    embed.setThumbnail(song.thumbnail);
-    embed.setFooter(`Заказал ${song.author}`)
+    historyembed.setTitle(`**${song.title}**`)
+    historyembed.setURL(song.url);
+    historyembed.setColor('#8b00ff')
+    historyembed.setThumbnail(song.thumbnail);
+    historyembed.setFooter(`Заказал ${song.author}`)
 
-    return embed;
+    return historyembed;
 
 }

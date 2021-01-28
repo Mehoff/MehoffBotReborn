@@ -12,6 +12,11 @@ module.exports = {
 
     async execute(message, args) {
     
+    console.log(message);
+
+    if(!message.member.voice.channel && !message.author.bot){
+        message.channel.send('Для начала зайди в голосовой канал 🙂').then(msg => msg.delete({timeout : 2000})); return;}
+
     channel = message.channel;
     connection = await message.member.voice.channel.join();
     
@@ -28,7 +33,9 @@ module.exports = {
 
             UpdateEmbed();
 
+
             await message.client.channels.cache.get(music_history).send(await GetHistoryEmbed(song))
+                //.then(history_embed => history_embed.react('▶️'));
 
             message.delete()
         })

@@ -9,14 +9,14 @@ const ytdl = require('ytdl-core')
 
 function PlaySong(url)
 {
-    try
-    {
-        var stream = ytdl(url, options);
-        dispatcher = connection.play(stream);
 
-    
+    var stream = ytdl(url, options);
+    dispatcher = connection.play(stream);
+
+
     dispatcher.on('start', () => {
         console.log('dispatcher::start')
+        client.user.setActivity(`${CURRENT.title}`, {type: 'PLAYING'})
     })
 
     dispatcher.on('finish', () => {
@@ -31,6 +31,8 @@ function PlaySong(url)
             CURRENT = null; 
             dispatcher.destroy();
             connection.disconnect();
+            connection = null;
+            client.user.setActivity('nothing', {type: 'PLAYING'})
         }
         
         else { CURRENT = QUEUE.shift(); PlaySong(CURRENT.url);}
@@ -40,10 +42,4 @@ function PlaySong(url)
      })
 
     dispatcher.on("error", (error) => console.log(error));
-
-}
-catch(error)
-{
-    console.log('ytdl error')
-}
 }

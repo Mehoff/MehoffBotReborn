@@ -4,7 +4,7 @@ const fs = require('fs');
 const config = require('./config.json');
 const { UpdateEmbed } = require('./functions/updateEmbed');
 
-global.client = new Client();
+global.client = new Client({partials: ['MESSAGE', 'CHANNEL', 'REACTION']});
 client.commands = new Discord.Collection();
 
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
@@ -16,6 +16,7 @@ for (const file of commandFiles) {
 
 client.on('ready', () => {
 
+    client.user.setActivity('nothing', {type: 'PLAYING'})
     global.QUEUE = [];
     global.CURRENT = null;
     global.connection = null;    
@@ -32,6 +33,7 @@ client.on('ready', () => {
     global.embed = null;
     global.repeat = false;
     global.paused = false;
+    global.radio = false;
 
     global.options = 
     {
@@ -40,14 +42,12 @@ client.on('ready', () => {
         highWaterMark: 1<<25,
     }
 
-    
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
 
 client.on('message', async message => {
   
-    // if message has embed.
     if(!message.content.startsWith(config.prefix) || message.author.bot)
         return;
     
@@ -71,25 +71,36 @@ client.on('message', async message => {
 );
 
 client.on('messageReactionAdd', async (reaction, user) =>{
+
     if(user.bot)
         return;
+
+    // if(reaction.partial)
+    // {
+    //     try
+    //     {
+    //         await reaction.fetch();
+    //     }
+    //     catch(err)
+    //     {
+    //         console.log('Reaction exception', err);
+    //         return;
+    //     }
+    // }
 
     if(embed)
         embed.reactions.resolve(reaction).users.remove(user.id);
 
-    if(!CURRENT)
-    {
-        client.commands.get('play').execute(reaction.message, reaction.message.embeds[0].url)
-    }
-
     switch(reaction.emoji.name)
     {
+        // case '▶️':
+        //     client.commands.get('play').execute(reaction.message, reaction.message.embeds[0].url)
+        //     break;
         case '⏯️': 
             if(!paused)
             {
                 paused = true;
                 client.commands.get('pause').execute(reaction.message, null);
-                
             } else { 
                 paused = false;
                 client.commands.get('resume').execute(reaction.message,null); 
@@ -102,13 +113,15 @@ client.on('messageReactionAdd', async (reaction, user) =>{
                 client.commands.get('shuffle').execute(reaction.message, null);   
             break;
         case '🔁':
-            if(!repeat)
-                repeat = true;
-            else 
-                repeat = false;
-
+            repeat = !repeat;
             UpdateEmbed();
             break;
+        case '📻':
+            radio = !radio;
+            reaction.message.channel.send('Радио находится в разработке...', {files: ['https://emoji.gg/assets/emoji/9716_Pepega.png']})
+                .then(msg => {msg.delete({timeout: 2000})})
+            break;
+
     }
     
 })

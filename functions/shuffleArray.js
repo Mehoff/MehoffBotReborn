@@ -1,8 +1,8 @@
 module.exports = {
-    shuffle
+    Shuffle
 }
 
-function shuffle(array) {
+function Shuffle(array) {
     var currentIndex = array.length, temporaryValue, randomIndex;
   
     while (0 !== currentIndex) {
