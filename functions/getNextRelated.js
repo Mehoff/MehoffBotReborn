@@ -5,7 +5,7 @@ module.exports = {
 const fetch = require('node-fetch')
 const ytdl = require('ytdl-core')
 const ytKey = require('../config.json')['youtube-api-key'];
-const maxResults = 1;
+const maxResults = 3;
 
 const baseYoutubeURL = 'https://www.youtube.com/watch?v='
 
@@ -25,7 +25,7 @@ async function GetNextRelated(url)
                         if(res.error){console.log(res.error); return;}
                         
                         console.log(`reqLink: ${reqLink}`)
-                        resolve( `${baseYoutubeURL}${res.items[0].id.videoId}`)
+                        resolve( `${baseYoutubeURL}${res.items[1].id.videoId}`)
                     })
         
         }
