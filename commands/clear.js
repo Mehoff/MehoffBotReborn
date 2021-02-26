@@ -1,4 +1,4 @@
-const { ClearMessages } =  require('../functions/clearMessages');
+const { ClearMessages, ClearAnyMessages } =  require('../functions/clearMessages');
 
 module.exports = 
 {
@@ -8,7 +8,7 @@ module.exports =
 
     async execute(message, args)
     {
-        await ClearMessages(message.channel, 99).then(deletedMessagesCount => {
+        await ClearAnyMessages(message.channel, 99).then(deletedMessagesCount => {
             console.log(`Deleted ${deletedMessagesCount} messages`)
         })
 

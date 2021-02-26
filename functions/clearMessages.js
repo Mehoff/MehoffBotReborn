@@ -1,5 +1,5 @@
 module.exports = {
-    ClearMessages,
+    ClearMessages, ClearAnyMessages
 };
 
 
@@ -28,21 +28,21 @@ async function ClearMessages(channel, limit)
 
 
 // Для любых сообщений
-// async function ClearMessages(channel, limit)
-// {
-//     return new Promise(async (resolve, reject) => {
-//         try{
-//             await channel.messages.fetch({limit: limit})
-//                 .then(fetched =>
-//                     {
-//                         fetched.forEach(async msg => {
-//                             await msg.delete();
-//                         })
-//                     })
-//         }
-//         catch(error){
-//             reject(error);
-//         }
-//     })
+async function ClearAnyMessages(channel, limit)
+{
+    return new Promise(async (resolve, reject) => {
+        try{
+            await channel.messages.fetch({limit: limit})
+                .then(fetched =>
+                    {
+                        fetched.forEach(async msg => {
+                            await msg.delete();
+                        })
+                    })
+        }
+        catch(error){
+            reject(error);
+        }
+    })
 
-// }
+}

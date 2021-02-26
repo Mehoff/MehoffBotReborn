@@ -5,7 +5,7 @@ module.exports = {
 const fetch = require('node-fetch')
 const ytdl = require('ytdl-core')
 const ytKey = require('../config.json')['youtube-api-key'];
-const maxResults = 3;
+const maxResults = 5;
 
 const baseYoutubeURL = 'https://www.youtube.com/watch?v='
 

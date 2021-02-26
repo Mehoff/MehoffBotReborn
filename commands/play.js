@@ -2,8 +2,6 @@ const { PlaySong } = require('../functions/playSong.js');
 const { UpdateEmbed, GetHistoryEmbed } = require('../functions/updateEmbed.js');
 const { GetSong } = require('../functions/getSong.js');
 
-
-
 module.exports = {
 
     name: 'play',
@@ -11,9 +9,9 @@ module.exports = {
     aliases: ['p','здфн', 'з'],
 
     async execute(message, args) {
-    
-    console.log(message);
 
+    
+        // Почему-то не работает
     if(!message.member.voice.channel && !message.author.bot){
         message.channel.send('Для начала зайди в голосовой канал 🙂').then(msg => msg.delete({timeout : 2000})); return;}
 
@@ -32,10 +30,6 @@ module.exports = {
             }
 
             UpdateEmbed();
-
-
-            //await message.client.channels.cache.get(music_history).send(await GetHistoryEmbed(song))
-                //.then(history_embed => history_embed.react('▶️'));
 
             message.delete()
         })

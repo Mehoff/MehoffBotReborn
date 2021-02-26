@@ -68,7 +68,6 @@ async function GetSongByYTLink(link)
     try
     {
 
-        console.log(`GetSongByYTLink: ${link}`)
         if(!ytdl.validateURL(link))
             reject();
 
@@ -79,11 +78,9 @@ async function GetSongByYTLink(link)
                     thumbnail: res.videoDetails.thumbnails[1].url,
                     uploaded: res.videoDetails.uploadDate,
                     url: link,
-                    author: 'Радио',
+                    author: 'Нет автора',
                 };
 
-
-                console.log(song);
                 resolve(song);
     })
     }
