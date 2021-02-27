@@ -14,20 +14,31 @@ async function GetNextRelated(url)
     return new Promise(function(resolve, reject){
         try
         {
-            console.log(`GetNextRelated to: ${url}`)
-            var id = ytdl.getVideoID(url);  
-            var reqLink = `https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId=${id}&type=video&maxResults=${maxResults}&key=${ytKey}`;
+            const id = ytdl.getVideoID(url);  
+            const reqLink = `https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId=${id}&type=video&maxResults=${maxResults}&key=${ytKey}`;
         
+            try{
             fetch(reqLink)
                 .then(answer => answer.json())
                 .then(res =>
                     {
-                        if(res.error){console.log(res.error); return;}
+                        if(res.error){
+                            console.log('GetNextRelated Error')
+                            console.log(res.error); 
+                            return;
+                        }
                         
-                        console.log(`reqLink: ${reqLink}`)
-                        resolve( `${baseYoutubeURL}${res.items[1].id.videoId}`)
+                        for(const item of res.items){
+                            if(!item.snippet)
+                                continue;
+                            resolve(`${baseYoutubeURL}${item.id.videoId}`)
+                        }
                     })
-        
+                }
+                catch(error){
+                    console.log('fetch error')
+                    reject(error)
+                }
         }
         catch(e)
         {

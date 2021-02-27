@@ -16,28 +16,25 @@ module.exports = {
         if(!dispatcher || !connection)
             return;
 
-        if(QUEUE.length > 0)
-        {
-            CURRENT = QUEUE.shift();
-            PlaySong(CURRENT.url);
-            UpdateEmbed();
-        }
-        else if(radio)
-        {
-            await GetNextRelated(CURRENT.url)
-                .then(async related => await GetSongByYTLink(related)
-                    .then(song => {
-                        CURRENT = song;
-                        PlaySong(CURRENT.url)
-                        UpdateEmbed();
-                }))
-        } 
-        else
-        {
-            dispatcher.destroy();
-            connection.disconnect();
-            CURRENT = null;
-        }
-        
+            if(radio){
+                await GetNextRelated(CURRENT.url)
+                            .then(async nextSongLink => await GetSongByYTLink(nextSongLink)
+                                .then(song => {
+                                    CURRENT = song;
+                                    PlaySong(CURRENT.url);
+                       }));
+            }
+            else if(QUEUE.length == 0){
+            
+                CURRENT = null; 
+                dispatcher.destroy(); connection.disconnect(); connection = undefined;
+                client.user.setActivity('nothing', {type: 'PLAYING'})
+            }
+               
+               else {
+                   CURRENT = QUEUE.shift(); PlaySong(CURRENT.url);
+            }
+            
+            if(CURRENT) UpdateEmbed();
     }
 };

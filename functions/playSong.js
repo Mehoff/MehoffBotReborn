@@ -32,7 +32,9 @@ async function PlaySong(url){
     dispatcher.on('finish', async () => {
 
         console.log('dispatcher::finish');
-        if(repeat) PlaySong(CURRENT.url)
+        if(repeat) 
+            PlaySong(CURRENT.url)
+        
         onNextSong();
      })
 
@@ -52,7 +54,7 @@ async function onNextSong(){
    else if(QUEUE.length == 0){
 
        CURRENT = null; 
-       dispatcher.destroy(); connection.disconnect(); connection = null;
+       dispatcher.destroy(); connection.disconnect(); connection = undefined;
        client.user.setActivity('nothing', {type: 'PLAYING'})
 }
    
