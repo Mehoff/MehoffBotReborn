@@ -32,7 +32,9 @@ async function PlaySong(url){
     dispatcher.on('finish', async () => {
 
         console.log('dispatcher::finish');
-        if(repeat) 
+        
+        console.log(`repeat: ${repeat}`);
+        if(repeat == true) 
             PlaySong(CURRENT.url)
         
         onNextSong();
