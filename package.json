@@ -15,7 +15,7 @@
     "node-fetch": "^2.6.1",
     "opusscript": "0.0.7",
     "simple-youtube-api": "^5.2.1",
-    "ytdl-core": "^4.8.2",
+    "ytdl-core": "^4.8.3",
     "ytpl": "^1.0.1"
   }
 }

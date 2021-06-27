@@ -42,6 +42,7 @@ client.on('ready', () => {
         highWaterMark: 1<<25,
     }
 
+    
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
