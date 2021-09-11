@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.js",
+    "nodemon": "nodemon index.js"
   },
   "author": "Mehoff",
   "license": "ISC",
@@ -15,7 +16,10 @@
     "node-fetch": "^2.6.1",
     "opusscript": "0.0.7",
     "simple-youtube-api": "^5.2.1",
-    "ytdl-core": "^4.8.3",
+    "ytdl-core": "^4.9.1",
     "ytpl": "^1.0.1"
+  },
+  "engines": {
+    "node": "^14.16"
   }
 }

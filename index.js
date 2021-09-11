@@ -1,132 +1,80 @@
-const Discord = require('discord.js');
-const { Client } = require('discord.js');
-const fs = require('fs');
-const config = require('./config.json');
-const { UpdateEmbed } = require('./functions/updateEmbed');
+const Discord = require("discord.js");
+const { Client } = require("discord.js");
+const fs = require("fs");
+const config = require("./config.json");
+const { getGuildPlayer } = require("./functions/getGuildPlayer");
+const { UpdateEmbed } = require("./functions/updateEmbed");
 
-global.client = new Client({partials: ['MESSAGE', 'CHANNEL', 'REACTION']});
-client.commands = new Discord.Collection();
+global.client = new Client({ partials: ["MESSAGE", "CHANNEL", "REACTION"] });
+client.commands = [];
 
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const ACCEPTED_CHANNELS = [
+  config["music-channel-id"],
+  config["bot-testing-id"],
+];
+
+const commandFiles = fs
+  .readdirSync("./commands")
+  .filter((file) => file.endsWith(".js"));
 for (const file of commandFiles) {
-	const command = require(`./commands/${file}`);
-    client.commands.set(command.name, command);
-    console.log(`${command.name} found...`)
+  const command = require(`./commands/${file}`);
+  client.commands.push(command);
 }
 
-client.on('ready', () => {
+client.on("ready", () => {
+  client.user.setActivity("nothing", { type: "PLAYING" });
 
-    client.user.setActivity('nothing', {type: 'PLAYING'})
-    global.QUEUE = [];
-    global.CURRENT = null;
-    global.connection = null;    
-    global.dispatcher = null;
-    global.channel = null;
-
-
-    // Stream не нужен
-    global.stream = null;
-    
-    // VoiceChannel тоже не нужен...
-    global.voiceChannel = null;
-
-    global.embed = null;
-    global.repeat = false;
-    global.paused = false;
-    global.radio = false;
-
-    global.options = 
-    {
-        filter: "audioonly",
-        dlChunkSize: 0,
-        highWaterMark: 1<<25,
-    }
-
-    
-    console.log(`Logged in as ${client.user.tag}!`);
+  global.GUILDS = new Map();
+  console.log(`Logged in as ${client.user.tag}!`);
+  console.log(`Node.js version: ${process.version}`);
 });
 
-
-client.on('message', async message => {
-  
-    if(!message.content.startsWith(config.prefix) || message.author.bot)
-        return;
-    
-    const args = message.content.slice(config.prefix.length).trim().split(/ +/);
-    const command = args.shift().toLowerCase();
-
-    if(message.channel.id != '777553955449470986' || !client.commands.has(command) || !command){
-        await message.delete(); return;
-    }
-
-    try {
-        client.commands.get(command).execute(message, args);
-    }
-    
-    catch(error) {
-        console.error(error)
-        message.channel.send('Ошибка во время вызова команды :C')
-            .then(msg => {msg.delete({timeout: 2000})})
-    }
+function getCommand(input) {
+  for (const command of client.commands) {
+    if (command.name === input || command.aliases.includes(input))
+      return command;
   }
-);
+  return null;
+}
 
-client.on('messageReactionAdd', async (reaction, user) =>{
+client.on("message", async (message) => {
+  if (!message.content.startsWith(config.prefix) || message.author.bot) return;
 
-    if(user.bot)
-        return;
+  if (!ACCEPTED_CHANNELS.find((id) => id === message.channel.id)) {
+    message.channel.send("Wrong channel");
+    await message.delete();
+    return;
+  }
 
-    // if(reaction.partial)
-    // {
-    //     try
-    //     {
-    //         await reaction.fetch();
-    //     }
-    //     catch(err)
-    //     {
-    //         console.log('Reaction exception', err);
-    //         return;
-    //     }
-    // }
+  const args = message.content.slice(config.prefix.length).trim().split(/ +/);
+  const commandName = args.shift().toLowerCase();
+  const command = getCommand(commandName);
 
-    if(embed)
-        embed.reactions.resolve(reaction).users.remove(user.id);
+  if (!command) {
+    await message.delete();
+    return;
+  }
 
-    switch(reaction.emoji.name)
-    {
-        // case '▶️':
-        //     client.commands.get('play').execute(reaction.message, reaction.message.embeds[0].url)
-        //     break;
-        case '⏯️': 
-            if(!paused)
-            {
-                paused = true;
-                client.commands.get('pause').execute(reaction.message, null);
-            } else { 
-                paused = false;
-                client.commands.get('resume').execute(reaction.message,null); 
-            }
-            break;
-        case '⏭️': 
-                client.commands.get('skip').execute(reaction.message, null);
-            break;
-        case '🔀': 
-                client.commands.get('shuffle').execute(reaction.message, null);   
-            break;
-        case '🔁':
-            repeat = !repeat;
-            UpdateEmbed();
-            break;
-        case '📻':
-            radio = !radio;
-            UpdateEmbed();
-            // reaction.message.channel.send('Радио находится в разработке...', {files: ['https://emoji.gg/assets/emoji/9716_Pepega.png']})
-            //     .then(msg => {msg.delete({timeout: 2000})})
-             break;
+  try {
+    command.execute(message, args);
+  } catch (err) {
+    console.error("command.execute error", err);
+    await message.channel
+      .send("Ошибка во время вызова команды :c")
+      .then((msg) => msg.delete({ timeout: 2000 }));
+    return;
+  }
+});
 
-    }
-    
-})
+client.on("messageReactionAdd", async (messageReaction, user) => {
+  if (user.bot) return;
+
+  const player = getGuildPlayer(messageReaction.message);
+
+  player
+    ? await player.onReaction(messageReaction, user)
+    : console.log("NO PLAYER");
+});
 
 client.login(config["discord-token"]);
 
@@ -136,12 +84,11 @@ client.login(config["discord-token"]);
 
 // GET Metainfo from ytdl for rich interface
 // MongoDB for personal playlists and more
-// add embed...
-// .evn support
+// .env support
 // node-ytpl
-// асинхронная работа с ytdl, embed чтобы убрать подлаг при доблавлении нового трека
-// skip last
-// skip front
 // search {Название трека} {Кол-во результатов}
 // playlist
+// vk
+// set to node js v14.16
 
+//https://github.com/discordjs/discord.js/issues/5300
