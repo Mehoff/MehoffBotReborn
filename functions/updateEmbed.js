@@ -6,7 +6,6 @@ module.exports = {
 
 const Discord = require("discord.js");
 const MusicPlayer = require("../modules/musicPlayer");
-const StringConverter = require("../modules/stringConverter");
 
 /**
  * My function description

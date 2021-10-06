@@ -1,14 +1,13 @@
 module.exports = {
-  GetSong,
-  GetSongByYTLink,
+  getSong,
+  getRelatedSong,
 };
 
 const Song = require("../modules/Song");
-
 const API = require("simple-youtube-api");
-const youtube = new API(require("../config.json")["youtube-api-key"]);
+const youtube = new API(process.env.YOUTUBE_API_KEY);
 const ytdl = require("ytdl-core");
-const config = require("../config.json");
+const fetch = require("node-fetch");
 
 // // TODO:
 // response = await fetch(`https://www.yt-download.org/api/button/mp3/${youtubeID}}`);
@@ -17,7 +16,7 @@ const config = require("../config.json");
 // Implement mp3 downloading from this web-site for age restricted videos
 // https://github.com/fent/node-ytdl-core/issues/985 -> Steal impementation XD
 
-async function GetSong(message, args) {
+async function getSong(message, args) {
   const input = args[0];
   let url;
 
@@ -33,20 +32,11 @@ async function GetSong(message, args) {
       return;
     }
 
-    const token = String.raw`QUFFLUhqbDJTYTlIWVR1ZlJsTWdqbjY2VFJSbENTMzc2QXw\u003d`;
-    console.log(token);
-
-    const info = await ytdl.getInfo(url, {
-      requestOptions: {
-        headers: {
-          cookie: config["cookie"],
-        },
-      },
-    });
+    const info = await ytdl.getInfo(url);
+    //https://github.com/fent/node-ytdl-core/issues/980#issuecomment-886211227 EPXOL
 
     const song = new Song(
       info.videoDetails.title,
-      //info.videoDetails.thumbnails[1].url,
       info.videoDetails.thumbnails[2].url,
       info.videoDetails.uploadDate,
       url,
@@ -55,6 +45,30 @@ async function GetSong(message, args) {
 
     return song;
   } catch (err) {
+    // Catch 410 error here, and make second request with cookies
+    if (error.statusCode > 300) {
+      const info = await ytdl.getInfo(url, {
+        requestOptions: {
+          headers: {
+            cookie: process.env.COOKIE,
+            "x-user-data": process.env.YOUTUBE_ID_TOKEN,
+          },
+        },
+      });
+
+      if (info.videoDetails) {
+        const song = new Song(
+          info.videoDetails.title,
+          info.videoDetails.thumbnails[2].url,
+          info.videoDetails.uploadDate,
+          url,
+          message.author
+        );
+
+        return song;
+      } else return null;
+    }
+
     message.channel.send(
       "```Ошибка во время воспроизведения трека, возможные причины: частые запросы, либо видео имеет ограничение по возрасту (решение данной проблемы в разработке)```"
     );
@@ -63,26 +77,63 @@ async function GetSong(message, args) {
   }
 }
 
-async function GetSongByYTLink(link) {
-  return new Promise(function (resolve, reject) {
-    var info = {};
-    var song = {};
-    try {
-      if (!ytdl.validateURL(link)) reject();
+/**
+ * Adds Song object to music player song queue array
+ * @param {Song} song Song we use to search related
+ * @param {string[]} history Array of songs radio already played as relayed, use it to exclude duplicates
+ */
+async function getRelatedSong(song, history) {
+  const MAX_RESULTS = 10;
+  const BASE = "https://www.youtube.com/watch?v=";
+  const id = ytdl.getVideoID(song.url);
+  const requestUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId=${id}&type=video&maxResults=${MAX_RESULTS}&key=${process.env.YOUTUBE_API_KEY}`;
 
-      info = ytdl.getInfo(link).then((res) => {
-        new Song(
-          res.videoDetails.title,
-          res.videoDetails.thumbnails[1].url,
-          res.videoDetails.uploadDate,
-          link,
-          "Нет автора"
+  const response = await fetch(requestUrl).then((data) => data.json());
+  if (response.error || !response.items.length > 0) {
+    console.log("<!> getRelatedSong error", response.error);
+    return null;
+  }
+
+  for (const item of response.items) {
+    // get url from item.id.videoId
+    if (
+      !item.snippet ||
+      history.find(async (song) => ytdl.getVideoID(song.url) == item.id.videoId)
+    )
+      continue;
+
+    try {
+      const videoUrl = `${BASE}${item.id.videoId}`;
+      const info = await ytdl.getInfo(videoUrl);
+      const song = new Song(
+        info.videoDetails.title,
+        info.videoDetails.thumbnails[2].url,
+        info.videoDetails.uploadDate,
+        videoUrl,
+        client.user
+      );
+
+      return song;
+    } catch (err) {
+      if (err.statusCode > 300) {
+        const info = await ytdl.getInfo(videoUrl, {
+          requestOptions: {
+            headers: {
+              cookie: process.env.COOKIE,
+            },
+          },
+        });
+        const song = new Song(
+          info.videoDetails.title,
+          info.videoDetails.thumbnails[2].url,
+          info.videoDetails.uploadDate,
+          videoUrl,
+          client.user
         );
 
-        resolve(song);
-      });
-    } catch (e) {
-      reject(e);
+        return song;
+      } else return null;
     }
-  });
+  }
+  return null;
 }

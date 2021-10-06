@@ -1,11 +1,11 @@
-const { GetSong } = require("../functions/getSong");
-const ytdl = require("ytdl-core");
 const Discord = require("discord.js");
+const ytdl = require("ytdl-core");
+const { getSong, getRelatedSong } = require("../functions/getSong");
 const { GetEmbed } = require("../functions/updateEmbed");
-const Song = require("../modules/Song");
 const { shuffle } = require("../functions/shuffleArray");
+const Song = require("../modules/Song");
 
-const musicHistory = 804284091938766908;
+const musicHistoryChannel = 804284091938766908;
 
 //features: prepeare next stream if next song exists
 
@@ -18,6 +18,8 @@ const options = {
 class MusicPlayer {
   constructor() {
     this.queue = [];
+    this.radio = false;
+    this.radioHistory = [];
     this.current = null;
     this.paused = false;
     this.repeat = false;
@@ -35,12 +37,20 @@ class MusicPlayer {
     if (this.connection) {
       this.connection.disconnect();
       this.connection = null;
+      this.current = null;
+      this.dispatcher = undefined;
+      // Clear radioHistory after disconnect
+      this.radioHistory = [];
     }
   }
 
   async parse(message, args) {
+    // Если трек уже играет, то можно добавлять в очередь, не находясь на канале
+    if (!this.dispatcher && !message.member.voice.channel) return;
+
     this.channel = message.channel;
-    GetSong(message, args).then(async (song) => {
+
+    getSong(message, args).then(async (song) => {
       if (!song) {
         message.channel.send("Не удалось воспроизвести трек");
         return;
@@ -64,7 +74,7 @@ class MusicPlayer {
     return stream;
   }
 
-  onFinish() {
+  async onFinish() {
     if (this.repeat) {
       this.queue.unshift(this.current);
       this.play();
@@ -73,10 +83,30 @@ class MusicPlayer {
 
     if (this.queue.length > 0) {
       this.play();
-    } else {
-      this.current = undefined;
-      this.disconnect();
+      return;
     }
+
+    if (this.radio) {
+      const nextSong = await getRelatedSong(this.current, this.radioHistory);
+      if (nextSong) {
+        this.queue.unshift(nextSong);
+        this.radioHistory.push(nextSong);
+        this.play();
+        return;
+      } else {
+        if (this.channel) {
+          await this.channel.send(
+            "```Радио прекратило свою работу, из-за того что все треки стали повторятся. СОРИ ЭТО БЕТА Sadge```"
+          );
+        }
+        this.current = null;
+        this.disconnect();
+        return;
+      }
+    }
+
+    this.current = null;
+    this.disconnect();
   }
 
   /**
@@ -87,78 +117,82 @@ class MusicPlayer {
     this.queue.push(song);
   }
 
-  skip() {
-    this.onFinish();
+  async skip() {
+    await this.onFinish();
   }
 
   async play() {
     if (this.queue.length === 0) return;
 
     this.current = this.queue.shift();
-
-    this.updateEmbed();
+    await this.updateEmbed();
 
     try {
       const stream = await this.getStream(this.current.url);
-
       this.dispatcher = this.connection.play(stream);
 
-      // this.dispatcher.on("start", async () => {
-      // });
-
       this.dispatcher.on("finish", async () => {
-        this.onFinish();
+        await this.onFinish();
+      });
+
+      this.dispatcher.on("error", async (error) => {
+        console.log("Dispatcher error", error);
+        await this.onFinish();
       });
     } catch (err) {
-      if (this.channel)
+      console.log("Play error <!>:\n", err);
+      if (this.channel) {
         this.channel.send(
           "Ошибка воспроизведения, обратитесь к автору бота :)"
         );
-
-      this.onFinish();
+        await this.onFinish();
+      }
     }
   }
 
-  pause() {
+  async pause() {
     if (this.dispatcher && this.current && !this.paused) {
       this.dispatcher.pause();
       this.paused = true;
-      this.updateEmbed();
+      await this.updateEmbed();
     }
   }
 
-  resume() {
+  async resume() {
     if (this.dispatcher && this.current && this.paused) {
       this.dispatcher.resume();
       this.paused = false;
-      this.updateEmbed();
+      await this.updateEmbed();
     }
   }
 
-  toggleRepeat() {
+  async toggleRepeat() {
     this.repeat = !this.repeat;
-    this.updateEmbed();
+    await this.updateEmbed();
   }
 
-  shuffle() {
+  async toggleRadio() {
+    this.radio = !this.radio;
+    await this.updateEmbed();
+  }
+
+  async shuffle() {
     shuffle(this.queue);
-    this.updateEmbed();
+    await this.updateEmbed();
   }
 
   async updateEmbed() {
     const newEmbed = GetEmbed(this);
-
-    if (this.messageEmbed) {
-      this.messageEmbed.edit(newEmbed);
-    } else {
-      this.messageEmbed = await this.channel.send(newEmbed);
-    }
+    this.messageEmbed
+      ? this.messageEmbed.edit(newEmbed)
+      : (this.messageEmbed = await this.channel.send(newEmbed));
 
     this.messageEmbed
       .react("⏯️")
       .then(this.messageEmbed.react("⏭️"))
       .then(this.messageEmbed.react("🔀"))
-      .then(this.messageEmbed.react("🔁"));
+      .then(this.messageEmbed.react("🔁"))
+      .then(this.messageEmbed.react("📻"));
   }
   /**
    * Method whitch triggers when user reacts to any the message of guild
@@ -183,6 +217,9 @@ class MusicPlayer {
         break;
       case "🔁":
         this.toggleRepeat();
+        break;
+      case "📻":
+        this.toggleRadio();
         break;
     }
   }
