@@ -46,7 +46,7 @@ async function getSong(message, args) {
     return song;
   } catch (err) {
     // Catch 410 error here, and make second request with cookies
-    if (error.statusCode > 300) {
+    if (err.statusCode > 300) {
       const info = await ytdl.getInfo(url, {
         requestOptions: {
           headers: {
