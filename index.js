@@ -1,8 +1,5 @@
 const dotenv = require("dotenv");
-const result = dotenv.config();
-// if (result.error) {
-//   throw result.error;
-// }
+dotenv.config();
 
 const Discord = require("discord.js");
 const { Client } = require("discord.js");
@@ -11,11 +8,6 @@ const { getGuildPlayer } = require("./functions/getGuildPlayer");
 
 global.client = new Client({ partials: ["MESSAGE", "CHANNEL", "REACTION"] });
 client.commands = [];
-
-const ACCEPTED_CHANNELS = [
-  process.env.MUSIC_CHANNEL_ID,
-  process.env.BOT_TESTING_ID,
-];
 
 const commandFiles = fs
   .readdirSync("./commands")
@@ -41,6 +33,7 @@ function getCommand(input) {
     }
     return null;
   } catch (err) {
+    console.error(err);
     return null;
   }
 }
@@ -49,30 +42,17 @@ client.on("message", async (message) => {
   try {
     if (message.author.bot) return;
 
-    if (
-      !ACCEPTED_CHANNELS.find((id) => id === message.channel.id) &&
-      message.content.startsWith(process.env.PREFIX)
-    ) {
-      const msg = await message.channel.send(
-        "Wrong channel, go to *🎵music-channel*"
-      );
-      await msg.delete({ timeout: 2 * 1000 });
-      await message.delete({ timeout: 2 * 1000 });
-      return;
-    }
-    if (ACCEPTED_CHANNELS.find((id) => id === message.channel.id)) {
-      const args = message.content
-        .slice(process.env.PREFIX.length)
-        .trim()
-        .split(/ +/);
-      const commandName = args.shift().toLowerCase();
-      const command = getCommand(commandName);
+    const args = message.content
+      .slice(process.env.PREFIX.length)
+      .trim()
+      .split(/ +/);
+    const commandName = args.shift().toLowerCase();
+    const command = getCommand(commandName);
 
-      if (!command) {
-        await message.delete({ timeout: 1 * 1000 });
-      } else {
-        command.execute(message, args);
-      }
+    if (!command) {
+      await message.delete({ timeout: 1 * 1000 });
+    } else {
+      command.execute(message, args);
     }
   } catch (err) {
     await message.channel.send("Ошибка во время вызова команды").then((msg) => {
